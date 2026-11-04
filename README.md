@@ -34,12 +34,12 @@ Harness 默认只记录会话日志，不会告诉你：
 | **多口径总览** | 今天 / 7 天 / 30 天 / 全部 / 自定义区间，KPI 卡直观对比 |
 | **趋势图** | Token、请求、费用、模型耗时、输出速度五种指标；柱状/折线切换；模型筛选 |
 | **自动聚合粒度** | 今天→按小时；7/30 天→按天；更长区间自动按周（周一起算）或按月，绝不糊成一根柱 |
-| **GitHub 风格热力图** | 近 53 周每天一格，按请求/Token/费用/耗时着色，点格子即筛选当天 |
+| **GitHub 风格热力图** | 近 53 周每天一格，按请求/Token/费用/耗时着色；色阶随主题自动翻转（浅色主题越深＝用得越多），点格子即筛选当天 |
 | **模型分布** | 按请求/Token/费用/耗时排名的彩色占比条，点图例即筛选 |
 | **速度面板** | 速度分布（P25/P50/P75 区间）与速度趋势折线，多模型对比一眼看清 |
 | **可检索请求明细** | 按时间/耗时/Token 排序，支持模型与关键词搜索，失败请求有独立视图 |
 | **隐私模式** | 一键隐藏会话名、账号、错误详情与敏感模型名，数字不变——适合截图与共享 |
-| **峰谷计价** | 按北京时间工作日高峰/低谷两档价格估算，支持第三方中转按官方价假设 |
+| **峰谷计价 + 内置价目表** | 按北京时间工作日高峰/低谷两档估算；默认带 DeepSeek / OpenAI / Anthropic / Gemini 公开价目，按模型名自动匹配 |
 
 ## 界面
 
@@ -106,48 +106,62 @@ npm run doctor
 
 ## 计价（`pricing.json`）
 
-插件按 `pricing.json` 估算费用，改完重启生效：
+**开箱即用**：内置一份通用价目表，没配置过的模型会按**模型名**自动匹配估算，不必一上手就填价格。
+
+匹配顺序：`providers.<名字>` 精确命中 → 用该 provider 的价目表；否则按 `fallbacks` 用模型名匹配（`openai/gpt-4o` 与 `gpt-4o` 都认）；都没有才算「未定价」。**`providers` 永远优先于内置价目表**，配了自己的价格就按自己的算。
+
+内置覆盖（整理自各家公开标价，**仅供估算**）：
+
+| 家族 | 模型 |
+|---|---|
+| DeepSeek 官方 | `deepseek-flash` / `deepseek-chat` / `deepseek-reasoner`（含峰谷价）、`glm-5.3-flash` |
+| OpenAI | `gpt-5`、`gpt-5-mini`、`gpt-4.1`、`gpt-4.1-mini`、`gpt-4.1-nano`、`gpt-4o`、`gpt-4o-mini`、`o3`、`o4-mini` |
+| Anthropic | `claude-opus-4`、`claude-sonnet-4`、`claude-3-7-sonnet`、`claude-3-5-haiku` |
+| Google | `gemini-2.5-pro`、`gemini-2.5-flash`、`gemini-2.0-flash` |
+
+第三方中转、改过名的自定义模型不在内置范围内——按下面的格式自己加，或改 `fallbacks`。
 
 ```jsonc
 {
-  "peak": {                       // 峰谷时段（北京时间）
+  "fx": { "USD": 7.2 },            // 非人民币价目按此汇率折算成人民币显示
+  "peak": {                         // 峰谷时段（北京时间）
     "offsetMinutes": 480,
     "weekdays": [1, 2, 3, 4, 5],
     "windows": [["09:00", "12:00"], ["14:00", "18:00"]]
   },
-  "books": {                      // 价目表：单位「元 / 百万 token」
-    "deepseek-flash-2026-11": {
+  "books": {                        // 价目表
+    "openai-usd": {
+      "currency": "USD",            // 该表的计价货币
+      "source": "OpenAI 公开价目",
+      "note": "仅供估算，可在 pricing.json 覆盖。",
       "models": {
-        "deepseek-flash": {
-          "offPeak": { "cacheHit": 0.02, "cacheMiss": 1, "output": 4 },
-          "peak":    { "cacheHit": 0.04, "cacheMiss": 2, "output": 8 }
-        }
+        "gpt-4o": { "offPeak": { "cacheHit": 1.25, "cacheMiss": 2.5, "output": 10 } }
       }
     }
   },
-  "providers": {                  // provider → 价目表映射
+  "providers": {                    // 精确映射，优先级最高
     "official": {
       "label": "DeepSeek 官方",
-      "book": "deepseek-flash-2026-11",
+      "book": "deepseek-official",
       "source": "official",
       "models": { "deepseek-flash": "deepseek-flash" }
-    },
-    "relay": {                    // 改成你自己的 provider 名
-      "label": "第三方中转",
-      "book": "deepseek-flash-2026-11",
-      "source": "assumed-official",
-      "models": { "deepseek-v4.1-flash": "deepseek-flash" }
     }
-  }
+  },
+  "fallbacks": [                    // 模型名兜底匹配，从上到下第一个命中
+    { "match": "gpt-4o-mini", "book": "openai-usd", "model": "gpt-4o-mini", "label": "OpenAI 通用价目" },
+    { "match": "gpt-4o", "book": "openai-usd", "model": "gpt-4o", "label": "OpenAI 通用价目" }
+  ]
 }
 ```
 
 要点：
 
-- `providers.<p>` 的 key 必须和会话日志里 `provider/model` 的前半段一致，否则该模型显示「未确认价格」；
-- `books.<b>.models.<m>` 的 key 是**模型名**（`provider/` 之后的部分）；
-- 只有 `offPeak` 的模型（例如某些第三方模型无峰谷）在高峰时段按同一档计算；
-- 价格未确认的历史请求（早于 `effectiveFrom`）会在页脚标注，不会硬算。
+- `providers.<p>` 的 key 必须和会话日志里 `provider/model` 的前半段一致，匹配不到才走 `fallbacks`；
+- `fallbacks[].match` 默认**前缀匹配**（`mode` 可设为 `prefix` / `contains` / `exact`），会依次比对 `model`、`provider/model` 和模型名最后一段，所以 `gpt-4o-mini` 要写在 `gpt-4o` 之前；
+- `books.<b>.currency` 不是 `CNY` 时按 `fx` 折算，界面统一显示人民币；
+- 只有 `offPeak` 一档的模型（多数海外模型没有峰谷价）在高峰时段按同一档计算；
+- 价格未确认的历史请求（早于 `effectiveFrom`）会在页脚标注，不会硬算；
+- 用内置价目估算的模型会在页脚单独标注「按内置通用价目表估算」，不会被误当成账单金额。
 
 ## 指标口径
 

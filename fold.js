@@ -17,67 +17,352 @@ const QUARTER = 900_000
  * configured timezone offset (Asia/Shanghai = +480 minutes).
  */
 export const DEFAULT_PRICING = {
-  schema: 2,
-  currency: 'CNY',
-  symbol: '¥',
-  checkedAt: '2026-11-03',
-  peak: {
-    offsetMinutes: 480,
-    weekdays: [1, 2, 3, 4, 5],
-    windows: [
-      ['09:00', '12:00'],
-      ['14:00', '18:00'],
+  "schema": 3,
+  "currency": "CNY",
+  "symbol": "¥",
+  "checkedAt": "2026-11-04",
+  "fx": {
+    "USD": 7.2
+  },
+  "peak": {
+    "offsetMinutes": 480,
+    "weekdays": [
+      1,
+      2,
+      3,
+      4,
+      5
     ],
-    holidays: [],
+    "windows": [
+      [
+        "09:00",
+        "12:00"
+      ],
+      [
+        "14:00",
+        "18:00"
+      ]
+    ],
+    "holidays": []
   },
-  books: {
-    'deepseek-flash-2026-11': {
-      effectiveFrom: '2026-10-28',
-      verifiedAt: '2026-11-03',
-      source: 'DeepSeek 官方定价文档',
-      url: 'https://api-docs.deepseek.com/zh-cn/quick_start/pricing/',
-      currency: 'CNY',
-      note: '官方文档未公布价格生效日期，从本地最早日志日起适用；更早请求标记为价格未确认。',
-      models: {
-        'deepseek-flash': {
-          offPeak: { cacheHit: 0.02, cacheMiss: 1, output: 4 },
-          peak: { cacheHit: 0.04, cacheMiss: 2, output: 8 },
+  "books": {
+    "deepseek-official": {
+      "currency": "CNY",
+      "effectiveFrom": "2026-10-28",
+      "verifiedAt": "2026-11-03",
+      "source": "DeepSeek 官方定价文档",
+      "url": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+      "note": "官方文档未公布价格生效日期，从本地最早日志日起适用；更早请求标记为价格未确认。",
+      "models": {
+        "deepseek-flash": {
+          "offPeak": {
+            "cacheHit": 0.02,
+            "cacheMiss": 1,
+            "output": 4
+          },
+          "peak": {
+            "cacheHit": 0.04,
+            "cacheMiss": 2,
+            "output": 8
+          }
         },
-        'glm-5.3-flash': {
-          // 智谱官方文档（docs.bigmodel.cn/cn/guide/start/pricing），无峰谷价。
-          offPeak: { cacheHit: 0.23, cacheMiss: 0.8, output: 2.8 },
+        "glm-5.3-flash": {
+          "offPeak": {
+            "cacheHit": 0.23,
+            "cacheMiss": 0.8,
+            "output": 2.8
+          }
+        }
+      }
+    },
+    "openai-usd": {
+      "currency": "USD",
+      "source": "OpenAI 公开价目",
+      "url": "https://platform.openai.com/docs/pricing",
+      "note": "内置通用价目：按公开美元标价整理，未与官网逐项复核；仅供估算，可在 pricing.json 覆盖。",
+      "models": {
+        "gpt-5": {
+          "offPeak": {
+            "cacheHit": 0.125,
+            "cacheMiss": 1.25,
+            "output": 10
+          }
         },
-      },
+        "gpt-5-mini": {
+          "offPeak": {
+            "cacheHit": 0.025,
+            "cacheMiss": 0.25,
+            "output": 2
+          }
+        },
+        "gpt-4.1": {
+          "offPeak": {
+            "cacheHit": 0.5,
+            "cacheMiss": 2,
+            "output": 8
+          }
+        },
+        "gpt-4.1-mini": {
+          "offPeak": {
+            "cacheHit": 0.1,
+            "cacheMiss": 0.4,
+            "output": 1.6
+          }
+        },
+        "gpt-4.1-nano": {
+          "offPeak": {
+            "cacheHit": 0.025,
+            "cacheMiss": 0.1,
+            "output": 0.4
+          }
+        },
+        "gpt-4o": {
+          "offPeak": {
+            "cacheHit": 1.25,
+            "cacheMiss": 2.5,
+            "output": 10
+          }
+        },
+        "gpt-4o-mini": {
+          "offPeak": {
+            "cacheHit": 0.075,
+            "cacheMiss": 0.15,
+            "output": 0.6
+          }
+        },
+        "o3": {
+          "offPeak": {
+            "cacheHit": 0.5,
+            "cacheMiss": 2,
+            "output": 8
+          }
+        },
+        "o4-mini": {
+          "offPeak": {
+            "cacheHit": 0.275,
+            "cacheMiss": 1.1,
+            "output": 4.4
+          }
+        }
+      }
     },
-  },
-  providers: {
-    official: {
-      label: 'DeepSeek 官方',
-      book: 'deepseek-flash-2026-11',
-      source: 'official',
-      models: {
-        'deepseek-flash': 'deepseek-flash',
-        'deepseek-chat': 'deepseek-flash',
-        'deepseek-reasoner': 'deepseek-flash',
-      },
+    "anthropic-usd": {
+      "currency": "USD",
+      "source": "Anthropic 公开价目",
+      "url": "https://docs.anthropic.com/en/docs/about-claude/pricing",
+      "note": "内置通用价目：按公开美元标价整理，未与官网逐项复核；仅供估算，可在 pricing.json 覆盖。",
+      "models": {
+        "claude-opus-4": {
+          "offPeak": {
+            "cacheHit": 1.5,
+            "cacheMiss": 15,
+            "cacheWrite": 18.75,
+            "output": 75
+          }
+        },
+        "claude-sonnet-4": {
+          "offPeak": {
+            "cacheHit": 0.3,
+            "cacheMiss": 3,
+            "cacheWrite": 3.75,
+            "output": 15
+          }
+        },
+        "claude-3-7-sonnet": {
+          "offPeak": {
+            "cacheHit": 0.3,
+            "cacheMiss": 3,
+            "cacheWrite": 3.75,
+            "output": 15
+          }
+        },
+        "claude-3-5-haiku": {
+          "offPeak": {
+            "cacheHit": 0.08,
+            "cacheMiss": 0.8,
+            "cacheWrite": 1,
+            "output": 4
+          }
+        }
+      }
     },
-    relay: {
-      label: '第三方中转',
-      book: 'deepseek-flash-2026-11',
-      source: 'assumed-official',
-      note: '第三方中转默认按官方价假设；把 providers 的 key 改成你自己的 provider 名即可。',
-      models: {
-        'deepseek-flash': 'deepseek-flash',
-        'deepseek-v4-flash': 'deepseek-flash',
-        'deepseek-v4.1-flash': 'deepseek-flash',
-        'glm-5.3-flash': 'glm-5.3-flash',
-      },
+    "google-usd": {
+      "currency": "USD",
+      "source": "Google Gemini 公开价目",
+      "url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "note": "内置通用价目：按公开美元标价整理，未与官网逐项复核；仅供估算，可在 pricing.json 覆盖。",
+      "models": {
+        "gemini-2.5-pro": {
+          "offPeak": {
+            "cacheHit": 0.31,
+            "cacheMiss": 1.25,
+            "output": 10
+          }
+        },
+        "gemini-2.5-flash": {
+          "offPeak": {
+            "cacheHit": 0.075,
+            "cacheMiss": 0.3,
+            "output": 2.5
+          }
+        },
+        "gemini-2.0-flash": {
+          "offPeak": {
+            "cacheHit": 0.025,
+            "cacheMiss": 0.1,
+            "output": 0.4
+          }
+        }
+      }
+    }
+  },
+  "providers": {
+    "official": {
+      "label": "DeepSeek 官方",
+      "book": "deepseek-official",
+      "source": "official",
+      "models": {
+        "deepseek-flash": "deepseek-flash",
+        "deepseek-chat": "deepseek-flash",
+        "deepseek-reasoner": "deepseek-flash",
+        "glm-5.3-flash": "glm-5.3-flash"
+      }
+    }
+  },
+  "fallbacks": [
+    {
+      "match": "claude-opus-4",
+      "book": "anthropic-usd",
+      "model": "claude-opus-4",
+      "label": "Claude 通用价目"
     },
-  },
-  tools: {
-    search: { pricePer1000: 5, effectiveFrom: '2026-11-01', source: 'DeepSeek 官方', tracked: false },
-    fetch: { pricePer1000: 5, effectiveFrom: '2026-11-01', source: 'DeepSeek 官方', tracked: false },
-  },
+    {
+      "match": "claude-sonnet-4",
+      "book": "anthropic-usd",
+      "model": "claude-sonnet-4",
+      "label": "Claude 通用价目"
+    },
+    {
+      "match": "claude-3-7-sonnet",
+      "book": "anthropic-usd",
+      "model": "claude-3-7-sonnet",
+      "label": "Claude 通用价目"
+    },
+    {
+      "match": "claude-3.7-sonnet",
+      "book": "anthropic-usd",
+      "model": "claude-3-7-sonnet",
+      "label": "Claude 通用价目"
+    },
+    {
+      "match": "claude-3-5-haiku",
+      "book": "anthropic-usd",
+      "model": "claude-3-5-haiku",
+      "label": "Claude 通用价目"
+    },
+    {
+      "match": "claude-3.5-haiku",
+      "book": "anthropic-usd",
+      "model": "claude-3-5-haiku",
+      "label": "Claude 通用价目"
+    },
+    {
+      "match": "gpt-5-mini",
+      "book": "openai-usd",
+      "model": "gpt-5-mini",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gpt-5",
+      "book": "openai-usd",
+      "model": "gpt-5",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gpt-4.1-nano",
+      "book": "openai-usd",
+      "model": "gpt-4.1-nano",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gpt-4.1-mini",
+      "book": "openai-usd",
+      "model": "gpt-4.1-mini",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gpt-4.1",
+      "book": "openai-usd",
+      "model": "gpt-4.1",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gpt-4o-mini",
+      "book": "openai-usd",
+      "model": "gpt-4o-mini",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gpt-4o",
+      "book": "openai-usd",
+      "model": "gpt-4o",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "o4-mini",
+      "book": "openai-usd",
+      "model": "o4-mini",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "o3",
+      "book": "openai-usd",
+      "model": "o3",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gemini-2.5-pro",
+      "book": "google-usd",
+      "model": "gemini-2.5-pro",
+      "label": "Gemini 通用价目"
+    },
+    {
+      "match": "gemini-2.5-flash",
+      "book": "google-usd",
+      "model": "gemini-2.5-flash",
+      "label": "Gemini 通用价目"
+    },
+    {
+      "match": "gemini-2.0-flash",
+      "book": "google-usd",
+      "model": "gemini-2.0-flash",
+      "label": "Gemini 通用价目"
+    },
+    {
+      "match": "deepseek-reasoner",
+      "book": "deepseek-official",
+      "model": "deepseek-flash",
+      "label": "DeepSeek 官方价"
+    },
+    {
+      "match": "deepseek-chat",
+      "book": "deepseek-official",
+      "model": "deepseek-flash",
+      "label": "DeepSeek 官方价"
+    },
+    {
+      "match": "deepseek-flash",
+      "book": "deepseek-official",
+      "model": "deepseek-flash",
+      "label": "DeepSeek 官方价"
+    },
+    {
+      "match": "glm-5.3-flash",
+      "book": "deepseek-official",
+      "model": "glm-5.3-flash",
+      "label": "智谱官方价"
+    }
+  ]
 }
 
 /** Normalize the user price document; falls back to the built-in profile. */
@@ -94,6 +379,8 @@ export function normalizePricing(doc) {
     peak: base.peak && typeof base.peak === 'object' ? base.peak : DEFAULT_PRICING.peak,
     books: base.books,
     providers: base.providers,
+    fx: base.fx && typeof base.fx === 'object' ? base.fx : DEFAULT_PRICING.fx,
+    fallbacks: Array.isArray(base.fallbacks) ? base.fallbacks : DEFAULT_PRICING.fallbacks,
     tools: base.tools && typeof base.tools === 'object' ? base.tools : DEFAULT_PRICING.tools,
   }
 }
@@ -123,6 +410,8 @@ export function createBilling(pricing) {
   const holidays = new Set(Array.isArray(peak.holidays) ? peak.holidays : [])
   const books = pricing.books || {}
   const providers = pricing.providers || {}
+  const fx = pricing.fx && typeof pricing.fx === 'object' ? pricing.fx : {}
+  const fallbacks = Array.isArray(pricing.fallbacks) ? pricing.fallbacks : []
 
   function isPeak(time) {
     const local = time + offset * 60_000
@@ -153,55 +442,66 @@ export function createBilling(pricing) {
     }
   }
 
-  function billRequest(provider, model, time, usage) {
-    const providerConfig = providers[provider]
-    if (providerConfig === undefined) return unpriced('provider-unconfigured', { provider, model })
-    const label = providerConfig.label || provider
-    if (providerConfig.source === 'unconfirmed' || providerConfig.book === null || providerConfig.book === undefined) {
-      return unpriced('provider-unconfirmed', {
-        provider, model, providerLabel: label, source: providerConfig.source || 'unconfirmed', note: providerConfig.note,
-      })
+  /** Display-currency multiplier for a book; non-CNY books convert through `pricing.fx`. */
+  function fxRate(book) {
+    const currency = (book && book.currency) || pricing.currency || 'CNY'
+    if (currency === 'CNY') return 1
+    const rate = Number(fx[currency])
+    return Number.isFinite(rate) && rate > 0 ? rate : 1
+  }
+
+  /**
+   * Catalogue lookup for models no provider block claims: relay routes, renamed
+   * providers, or a provider shipping a new model before this file is edited.
+   * Entries are ordered by specificity, so `gpt-4o-mini` wins over `gpt-4o`.
+   */
+  function matchFallback(provider, model) {
+    if (fallbacks.length === 0) return null
+    const modelText = String(model || '')
+    const leaf = modelText.includes('/') ? modelText.slice(modelText.lastIndexOf('/') + 1) : modelText
+    const keys = [modelText, String(provider || '') + '/' + modelText, leaf].map((item) => item.toLowerCase())
+    for (const entry of fallbacks) {
+      if (!entry || typeof entry.match !== 'string' || typeof entry.book !== 'string' || typeof entry.model !== 'string') continue
+      const needle = entry.match.toLowerCase()
+      const mode = entry.mode === 'contains' || entry.mode === 'exact' ? entry.mode : 'prefix'
+      const hit = keys.some((key) => (mode === 'exact' ? key === needle : mode === 'contains' ? key.includes(needle) : key.startsWith(needle)))
+      if (hit) return entry
     }
-    const book = books[providerConfig.book]
-    if (book === undefined) {
-      return unpriced('book-missing', { provider, model, providerLabel: label, book: providerConfig.book })
-    }
+    return null
+  }
+
+  /** Price one request from a resolved book entry, or explain why it is unpriced. */
+  function priceFrom(bookName, bookModel, label, source, note, provider, model, time, usage) {
+    const book = books[bookName]
+    if (book === undefined) return unpriced('book-missing', { provider, model, providerLabel: label, book: bookName })
     const day = Math.floor((time + offset * 60_000) / DAY)
     const date = dayText(day)
     if (typeof book.effectiveFrom === 'string' && date < book.effectiveFrom) {
       return unpriced('price-not-effective', {
-        provider, model, providerLabel: label, source: providerConfig.source, book: providerConfig.book,
+        provider, model, providerLabel: label, source, book: bookName,
         effectiveFrom: book.effectiveFrom, verifiedAt: book.verifiedAt, note: book.note,
-      })
-    }
-    const bookModel = providerConfig.models && typeof providerConfig.models[model] === 'string'
-      ? providerConfig.models[model]
-      : null
-    if (bookModel === null) {
-      return unpriced('model-unmapped', {
-        provider, model, providerLabel: label, source: providerConfig.source, book: providerConfig.book,
-        effectiveFrom: book.effectiveFrom, verifiedAt: book.verifiedAt, note: providerConfig.note,
       })
     }
     const modelPrices = book.models ? book.models[bookModel] : undefined
     if (modelPrices === undefined) {
       return unpriced('model-unmapped', {
-        provider, model, providerLabel: label, source: providerConfig.source, book: providerConfig.book,
-        effectiveFrom: book.effectiveFrom, verifiedAt: book.verifiedAt, note: book.note,
+        provider, model, providerLabel: label, source, book: bookName,
+        effectiveFrom: book.effectiveFrom, verifiedAt: book.verifiedAt, note: note || book.note,
       })
     }
     const tier = isPeak(time) ? 'peak' : 'offPeak'
     const prices = modelPrices[tier] || modelPrices.offPeak
     if (prices === undefined) {
       return unpriced('tier-missing', {
-        provider, model, providerLabel: label, source: providerConfig.source, book: providerConfig.book,
-        effectiveFrom: book.effectiveFrom, verifiedAt: book.verifiedAt, note: book.note,
+        provider, model, providerLabel: label, source, book: bookName,
+        effectiveFrom: book.effectiveFrom, verifiedAt: book.verifiedAt, note: note || book.note,
       })
     }
-    const miss = Number(prices.cacheMiss) || 0
-    const hit = Number(prices.cacheHit) || 0
-    const output = Number(prices.output) || 0
-    const write = prices.cacheWrite === undefined ? miss : Number(prices.cacheWrite) || 0
+    const rate = fxRate(book)
+    const miss = (Number(prices.cacheMiss) || 0) * rate
+    const hit = (Number(prices.cacheHit) || 0) * rate
+    const output = (Number(prices.output) || 0) * rate
+    const write = prices.cacheWrite === undefined ? miss : (Number(prices.cacheWrite) || 0) * rate
     const input = Number(usage && usage.input) || 0
     const cacheRead = Number(usage && usage.cacheRead) || 0
     const cacheWrite = Number(usage && usage.cacheWrite) || 0
@@ -214,17 +514,51 @@ export function createBilling(pricing) {
       provider,
       model,
       providerLabel: label,
-      book: providerConfig.book,
+      book: bookName,
       bookModel,
-      source: providerConfig.source || 'official',
+      source,
       tier,
       prices: { miss, hit, write, output },
-      currency: book.currency || pricing.currency,
+      currency: pricing.currency || 'CNY',
       symbol: pricing.symbol,
       effectiveFrom: book.effectiveFrom,
       verifiedAt: book.verifiedAt,
-      note: providerConfig.note || book.note,
+      note: note || book.note,
     }
+  }
+
+  function billRequest(provider, model, time, usage) {
+    const providerConfig = providers[provider]
+    if (providerConfig !== undefined) {
+      const label = providerConfig.label || provider
+      if (providerConfig.source === 'unconfirmed' || providerConfig.book === null || providerConfig.book === undefined) {
+        return unpriced('provider-unconfirmed', {
+          provider, model, providerLabel: label, source: providerConfig.source || 'unconfirmed', note: providerConfig.note,
+        })
+      }
+      const book = books[providerConfig.book]
+      const mapped = providerConfig.models && typeof providerConfig.models[model] === 'string' ? providerConfig.models[model] : null
+      if (mapped !== null && book !== undefined && book.models !== undefined && book.models[mapped] !== undefined) {
+        return priceFrom(providerConfig.book, mapped, label, providerConfig.source || 'official', providerConfig.note, provider, model, time, usage)
+      }
+      if (book === undefined) {
+        return unpriced('book-missing', { provider, model, providerLabel: label, book: providerConfig.book })
+      }
+    }
+    const catalog = matchFallback(provider, model)
+    if (catalog !== null) {
+      const book = books[catalog.book]
+      if (book !== undefined && book.models !== undefined && book.models[catalog.model] !== undefined) {
+        return priceFrom(catalog.book, catalog.model, catalog.label || '通用价目表', 'catalog', book.note, provider, model, time, usage)
+      }
+    }
+    if (providerConfig === undefined) return unpriced('provider-unconfigured', { provider, model })
+    return unpriced('model-unmapped', {
+      provider, model, providerLabel: providerConfig.label || provider, source: providerConfig.source, book: providerConfig.book,
+      effectiveFrom: books[providerConfig.book] && books[providerConfig.book].effectiveFrom,
+      verifiedAt: books[providerConfig.book] && books[providerConfig.book].verifiedAt,
+      note: providerConfig.note,
+    })
   }
 
   return { billRequest, isPeak }
@@ -679,6 +1013,8 @@ export function summarize(sessions, from, to, tz, pricing, options) {
       if (modelAggregate !== undefined) {
         modelAggregate.cost += cost
         if (!bill.priced) modelAggregate.unknown += 1
+        if (bill.priced && bill.source === 'catalog') modelAggregate.catalog = true
+        if (bill.priced && bill.source === 'catalog') modelAggregate.catalogLabel = bill.providerLabel
       }
       dayCosts.set(day, (dayCosts.get(day) || 0) + cost)
       if (modelAggregate !== undefined && ms !== null) {
@@ -975,6 +1311,14 @@ export function summarize(sessions, from, to, tz, pricing, options) {
     heatmap: { start: heatStart, end: todayDay, coverageStart: earliest, days: heatDays },
     models: rows,
     unpriced,
+    // Models priced by the built-in catalogue rather than a provider block:
+    // the UI discloses these so an estimate is never mistaken for a bill.
+    catalog: rows.filter((row) => row.catalog === true && row.requests > 0).map((row) => ({
+      provider: row.provider,
+      model: row.model,
+      label: row.catalogLabel || '通用价目表',
+      requests: row.requests,
+    })),
     pricing: {
       currency: pricing.currency,
       symbol: pricing.symbol,

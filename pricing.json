@@ -1,30 +1,199 @@
 {
-  "schema": 2,
+  "schema": 3,
   "currency": "CNY",
   "symbol": "¥",
-  "checkedAt": "2026-11-03",
+  "checkedAt": "2026-11-04",
+  "fx": {
+    "USD": 7.2
+  },
   "peak": {
     "offsetMinutes": 480,
-    "weekdays": [1, 2, 3, 4, 5],
-    "windows": [["09:00", "12:00"], ["14:00", "18:00"]],
-    "holidays": [],
-    "note": "北京时间（UTC+8）工作日 09:00-12:00、14:00-18:00 为高峰；法定节假日请按年维护 holidays（YYYY-MM-DD）。未列出的日期按普通工作日判断。"
+    "weekdays": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "windows": [
+      [
+        "09:00",
+        "12:00"
+      ],
+      [
+        "14:00",
+        "18:00"
+      ]
+    ],
+    "holidays": []
   },
   "books": {
-    "deepseek-flash-2026-11": {
+    "deepseek-official": {
+      "currency": "CNY",
       "effectiveFrom": "2026-10-28",
       "verifiedAt": "2026-11-03",
       "source": "DeepSeek 官方定价文档",
       "url": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
-      "currency": "CNY",
-      "note": "官方文档未公布价格生效日期，这里从本地最早日志日（2026-10-28）起适用；早于该日期的请求标记为「价格未确认」。glm-5.3-flash 按智谱官方文档计价（无峰谷，仅 offPeak 档）。",
+      "note": "官方文档未公布价格生效日期，从本地最早日志日起适用；更早请求标记为价格未确认。",
       "models": {
         "deepseek-flash": {
-          "offPeak": { "cacheHit": 0.02, "cacheMiss": 1, "output": 4 },
-          "peak": { "cacheHit": 0.04, "cacheMiss": 2, "output": 8 }
+          "offPeak": {
+            "cacheHit": 0.02,
+            "cacheMiss": 1,
+            "output": 4
+          },
+          "peak": {
+            "cacheHit": 0.04,
+            "cacheMiss": 2,
+            "output": 8
+          }
         },
         "glm-5.3-flash": {
-          "offPeak": { "cacheHit": 0.23, "cacheMiss": 0.8, "output": 2.8 }
+          "offPeak": {
+            "cacheHit": 0.23,
+            "cacheMiss": 0.8,
+            "output": 2.8
+          }
+        }
+      }
+    },
+    "openai-usd": {
+      "currency": "USD",
+      "source": "OpenAI 公开价目",
+      "url": "https://platform.openai.com/docs/pricing",
+      "note": "内置通用价目：按公开美元标价整理，未与官网逐项复核；仅供估算，可在 pricing.json 覆盖。",
+      "models": {
+        "gpt-5": {
+          "offPeak": {
+            "cacheHit": 0.125,
+            "cacheMiss": 1.25,
+            "output": 10
+          }
+        },
+        "gpt-5-mini": {
+          "offPeak": {
+            "cacheHit": 0.025,
+            "cacheMiss": 0.25,
+            "output": 2
+          }
+        },
+        "gpt-4.1": {
+          "offPeak": {
+            "cacheHit": 0.5,
+            "cacheMiss": 2,
+            "output": 8
+          }
+        },
+        "gpt-4.1-mini": {
+          "offPeak": {
+            "cacheHit": 0.1,
+            "cacheMiss": 0.4,
+            "output": 1.6
+          }
+        },
+        "gpt-4.1-nano": {
+          "offPeak": {
+            "cacheHit": 0.025,
+            "cacheMiss": 0.1,
+            "output": 0.4
+          }
+        },
+        "gpt-4o": {
+          "offPeak": {
+            "cacheHit": 1.25,
+            "cacheMiss": 2.5,
+            "output": 10
+          }
+        },
+        "gpt-4o-mini": {
+          "offPeak": {
+            "cacheHit": 0.075,
+            "cacheMiss": 0.15,
+            "output": 0.6
+          }
+        },
+        "o3": {
+          "offPeak": {
+            "cacheHit": 0.5,
+            "cacheMiss": 2,
+            "output": 8
+          }
+        },
+        "o4-mini": {
+          "offPeak": {
+            "cacheHit": 0.275,
+            "cacheMiss": 1.1,
+            "output": 4.4
+          }
+        }
+      }
+    },
+    "anthropic-usd": {
+      "currency": "USD",
+      "source": "Anthropic 公开价目",
+      "url": "https://docs.anthropic.com/en/docs/about-claude/pricing",
+      "note": "内置通用价目：按公开美元标价整理，未与官网逐项复核；仅供估算，可在 pricing.json 覆盖。",
+      "models": {
+        "claude-opus-4": {
+          "offPeak": {
+            "cacheHit": 1.5,
+            "cacheMiss": 15,
+            "cacheWrite": 18.75,
+            "output": 75
+          }
+        },
+        "claude-sonnet-4": {
+          "offPeak": {
+            "cacheHit": 0.3,
+            "cacheMiss": 3,
+            "cacheWrite": 3.75,
+            "output": 15
+          }
+        },
+        "claude-3-7-sonnet": {
+          "offPeak": {
+            "cacheHit": 0.3,
+            "cacheMiss": 3,
+            "cacheWrite": 3.75,
+            "output": 15
+          }
+        },
+        "claude-3-5-haiku": {
+          "offPeak": {
+            "cacheHit": 0.08,
+            "cacheMiss": 0.8,
+            "cacheWrite": 1,
+            "output": 4
+          }
+        }
+      }
+    },
+    "google-usd": {
+      "currency": "USD",
+      "source": "Google Gemini 公开价目",
+      "url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "note": "内置通用价目：按公开美元标价整理，未与官网逐项复核；仅供估算，可在 pricing.json 覆盖。",
+      "models": {
+        "gemini-2.5-pro": {
+          "offPeak": {
+            "cacheHit": 0.31,
+            "cacheMiss": 1.25,
+            "output": 10
+          }
+        },
+        "gemini-2.5-flash": {
+          "offPeak": {
+            "cacheHit": 0.075,
+            "cacheMiss": 0.3,
+            "output": 2.5
+          }
+        },
+        "gemini-2.0-flash": {
+          "offPeak": {
+            "cacheHit": 0.025,
+            "cacheMiss": 0.1,
+            "output": 0.4
+          }
         }
       }
     }
@@ -32,29 +201,148 @@
   "providers": {
     "official": {
       "label": "DeepSeek 官方",
-      "book": "deepseek-flash-2026-11",
+      "book": "deepseek-official",
       "source": "official",
       "models": {
         "deepseek-flash": "deepseek-flash",
         "deepseek-chat": "deepseek-flash",
-        "deepseek-reasoner": "deepseek-flash"
-      }
-    },
-    "relay": {
-      "label": "第三方中转",
-      "book": "deepseek-flash-2026-11",
-      "source": "assumed-official",
-      "note": "第三方中转通常按官方价计费，这里按官方价假设，未与供应商确认。把 key 改成你自己的 provider 名即可（会话日志里的 provider/model 前半段）。",
-      "models": {
-        "deepseek-flash": "deepseek-flash",
-        "deepseek-v4-flash": "deepseek-flash",
-        "deepseek-v4.1-flash": "deepseek-flash",
+        "deepseek-reasoner": "deepseek-flash",
         "glm-5.3-flash": "glm-5.3-flash"
       }
     }
   },
-  "tools": {
-    "search": { "pricePer1000": 5, "effectiveFrom": "2026-11-01", "source": "DeepSeek 官方", "tracked": false },
-    "fetch": { "pricePer1000": 5, "effectiveFrom": "2026-11-01", "source": "DeepSeek 官方", "tracked": false }
-  }
+  "fallbacks": [
+    {
+      "match": "claude-opus-4",
+      "book": "anthropic-usd",
+      "model": "claude-opus-4",
+      "label": "Claude 通用价目"
+    },
+    {
+      "match": "claude-sonnet-4",
+      "book": "anthropic-usd",
+      "model": "claude-sonnet-4",
+      "label": "Claude 通用价目"
+    },
+    {
+      "match": "claude-3-7-sonnet",
+      "book": "anthropic-usd",
+      "model": "claude-3-7-sonnet",
+      "label": "Claude 通用价目"
+    },
+    {
+      "match": "claude-3.7-sonnet",
+      "book": "anthropic-usd",
+      "model": "claude-3-7-sonnet",
+      "label": "Claude 通用价目"
+    },
+    {
+      "match": "claude-3-5-haiku",
+      "book": "anthropic-usd",
+      "model": "claude-3-5-haiku",
+      "label": "Claude 通用价目"
+    },
+    {
+      "match": "claude-3.5-haiku",
+      "book": "anthropic-usd",
+      "model": "claude-3-5-haiku",
+      "label": "Claude 通用价目"
+    },
+    {
+      "match": "gpt-5-mini",
+      "book": "openai-usd",
+      "model": "gpt-5-mini",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gpt-5",
+      "book": "openai-usd",
+      "model": "gpt-5",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gpt-4.1-nano",
+      "book": "openai-usd",
+      "model": "gpt-4.1-nano",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gpt-4.1-mini",
+      "book": "openai-usd",
+      "model": "gpt-4.1-mini",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gpt-4.1",
+      "book": "openai-usd",
+      "model": "gpt-4.1",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gpt-4o-mini",
+      "book": "openai-usd",
+      "model": "gpt-4o-mini",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gpt-4o",
+      "book": "openai-usd",
+      "model": "gpt-4o",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "o4-mini",
+      "book": "openai-usd",
+      "model": "o4-mini",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "o3",
+      "book": "openai-usd",
+      "model": "o3",
+      "label": "OpenAI 通用价目"
+    },
+    {
+      "match": "gemini-2.5-pro",
+      "book": "google-usd",
+      "model": "gemini-2.5-pro",
+      "label": "Gemini 通用价目"
+    },
+    {
+      "match": "gemini-2.5-flash",
+      "book": "google-usd",
+      "model": "gemini-2.5-flash",
+      "label": "Gemini 通用价目"
+    },
+    {
+      "match": "gemini-2.0-flash",
+      "book": "google-usd",
+      "model": "gemini-2.0-flash",
+      "label": "Gemini 通用价目"
+    },
+    {
+      "match": "deepseek-reasoner",
+      "book": "deepseek-official",
+      "model": "deepseek-flash",
+      "label": "DeepSeek 官方价"
+    },
+    {
+      "match": "deepseek-chat",
+      "book": "deepseek-official",
+      "model": "deepseek-flash",
+      "label": "DeepSeek 官方价"
+    },
+    {
+      "match": "deepseek-flash",
+      "book": "deepseek-official",
+      "model": "deepseek-flash",
+      "label": "DeepSeek 官方价"
+    },
+    {
+      "match": "glm-5.3-flash",
+      "book": "deepseek-official",
+      "model": "glm-5.3-flash",
+      "label": "智谱官方价"
+    }
+  ]
 }

@@ -1,6 +1,6 @@
 {
   "name": "dsh-token-lens",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "TokenLens · 用量透镜：DeepSeek Harness 插件，把本地会话日志变成 Token / 请求 / 费用 / 缓存命中 / 模型速度的可视化用量看板。",
   "license": "MIT",
   "author": "muxili87-art",

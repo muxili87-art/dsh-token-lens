@@ -34,12 +34,12 @@ This plugin answers all of it at once: one click in the sidebar for trends, a he
 | **Multi-range overview** | Today / 7 days / 30 days / All time / custom range, with KPI cards for direct comparison |
 | **Trend charts** | Five metrics: tokens, requests, cost, model time, output speed; bar/line toggle; hover and model filtering |
 | **Automatic granularity** | Today → hourly; 7/30 days → daily; longer ranges switch to weekly (Monday-anchored) or calendar monthly, so the chart never collapses into one bar |
-| **GitHub-style heatmap** | One cell per day for the last 53 weeks, colored by requests/tokens/cost/time; click a cell to filter that day |
+| **GitHub-style heatmap** | One cell per day for the last 53 weeks, colored by requests/tokens/cost/time; the ramp follows the theme (on a light theme, darker means more usage); click a cell to filter that day |
 | **Model mix** | Ranked colored share bars per model, one click on the legend to filter |
 | **Speed panel** | Speed distribution (P25/P50/P75 ranges) and a speed trend chart for fast multi-model comparison |
 | **Searchable request log** | Sort by time/duration/tokens, filter by model and keyword, separate view for failed requests |
 | **Privacy mode** | One click hides session titles, accounts, error details and sensitive model names; every number stays identical — safe for screenshots and issues |
-| **Peak/off-peak pricing** | Estimates cost with separate peak/off-peak rates on Beijing-time weekdays; third-party relays can be assumed at official prices |
+| **Peak/off-peak pricing + built-in catalogue** | Peak/off-peak rates on Beijing-time weekdays; ships public list prices for DeepSeek / OpenAI / Anthropic / Gemini and matches them by model name |
 
 The panel follows the Harness language setting (Chinese / English).
 
@@ -108,48 +108,62 @@ With privacy mode on (top-right toggle):
 
 ## Pricing (`pricing.json`)
 
-Cost estimates come from `pricing.json`; restart after editing:
+**Works out of the box**: a built-in catalogue prices any model it recognizes by **model name**, so nothing has to be configured before the first chart.
+
+Resolution order: an exact `providers.<name>` block wins → otherwise `fallbacks` match the model name (both `openai/gpt-4o` and `gpt-4o` are recognized) → only then is the model *unpriced*. **Your `providers` entries always override the catalogue.**
+
+Bundled families (compiled from public list prices, **estimates only**):
+
+| Family | Models |
+|---|---|
+| DeepSeek official | `deepseek-flash` / `deepseek-chat` / `deepseek-reasoner` (with peak tiers), `glm-5.3-flash` |
+| OpenAI | `gpt-5`, `gpt-5-mini`, `gpt-4.1`, `gpt-4.1-mini`, `gpt-4.1-nano`, `gpt-4o`, `gpt-4o-mini`, `o3`, `o4-mini` |
+| Anthropic | `claude-opus-4`, `claude-sonnet-4`, `claude-3-7-sonnet`, `claude-3-5-haiku` |
+| Google | `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.0-flash` |
+
+Third-party relays and renamed custom models are out of scope — add them yourself with the format below, or extend `fallbacks`.
 
 ```jsonc
 {
-  "peak": {                       // peak windows (Beijing time)
+  "fx": { "USD": 7.2 },             // non-CNY books convert at this rate for display
+  "peak": {                         // peak windows (Beijing time)
     "offsetMinutes": 480,
     "weekdays": [1, 2, 3, 4, 5],
     "windows": [["09:00", "12:00"], ["14:00", "18:00"]]
   },
-  "books": {                      // price book, in CNY per 1M tokens
-    "deepseek-flash-2026-11": {
+  "books": {
+    "openai-usd": {
+      "currency": "USD",            // currency of this book
+      "source": "OpenAI public price list",
+      "note": "Estimate only; override in pricing.json.",
       "models": {
-        "deepseek-flash": {
-          "offPeak": { "cacheHit": 0.02, "cacheMiss": 1, "output": 4 },
-          "peak":    { "cacheHit": 0.04, "cacheMiss": 2, "output": 8 }
-        }
+        "gpt-4o": { "offPeak": { "cacheHit": 1.25, "cacheMiss": 2.5, "output": 10 } }
       }
     }
   },
-  "providers": {                  // provider -> price book
+  "providers": {                    // exact mapping, highest priority
     "official": {
       "label": "DeepSeek official",
-      "book": "deepseek-flash-2026-11",
+      "book": "deepseek-official",
       "source": "official",
       "models": { "deepseek-flash": "deepseek-flash" }
-    },
-    "relay": {                    // rename to your own provider key
-      "label": "Third-party relay",
-      "book": "deepseek-flash-2026-11",
-      "source": "assumed-official",
-      "models": { "deepseek-v4.1-flash": "deepseek-flash" }
     }
-  }
+  },
+  "fallbacks": [                    // name-based matching, first hit wins
+    { "match": "gpt-4o-mini", "book": "openai-usd", "model": "gpt-4o-mini", "label": "OpenAI catalogue" },
+    { "match": "gpt-4o", "book": "openai-usd", "model": "gpt-4o", "label": "OpenAI catalogue" }
+  ]
 }
 ```
 
 Key points:
 
-- the key of `providers.<p>` must match the `provider` half of `provider/model` in your session logs, otherwise those models show as *price unconfirmed*;
-- the key of `books.<b>.models.<m>` is the **model name** (the part after `provider/`);
-- models with only an `offPeak` tier (e.g. some third-party models without peak pricing) use that tier in peak hours too;
-- historical requests priced before `effectiveFrom` are flagged in the footer instead of being guessed.
+- the key of `providers.<p>` must match the `provider` half of `provider/model` in your logs; only unmatched models fall through to `fallbacks`;
+- `fallbacks[].match` is a **prefix** match by default (`mode` accepts `prefix` / `contains` / `exact`) and is tried against the model name, `provider/model`, and the last segment — so list `gpt-4o-mini` before `gpt-4o`;
+- a book whose `currency` is not `CNY` is converted through `fx`; the UI always displays CNY;
+- models with only an `offPeak` tier (most overseas models have no peak pricing) use that tier during peak hours too;
+- historical requests priced before `effectiveFrom` are flagged in the footer instead of being guessed;
+- models priced by the catalogue are called out in the footer as *estimated from the built-in catalogue*, so an estimate is never mistaken for a bill.
 
 ## Metric definitions
 

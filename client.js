@@ -199,6 +199,7 @@ window.__ModuleLoader__.load({
       'requests.count': '共 TN 条',
       'requests.inputHint': '输入 = 未命中缓存的输入 Token；总 Token = 输入 + 缓存 + 输出。',
       'note.unpriced': '以下模型没有价格，费用按 0 计：',
+      'note.catalog': '以下模型按内置通用价目表估算（仅供估算，可在 pricing.json 覆盖）：',
       'footer.source': '数据来自本地会话日志；这是本地记录的请求，不等价于供应商平台的完整用量。',
       'footer.coverage': '本地日志：SE 个会话（进行中 LE 个，读取失败 ER 个）。',
       'footer.cache': '缓存读取占比 = 缓存读取 ÷（输入 + 缓存读取），只反映输入侧。',
@@ -378,6 +379,7 @@ window.__ModuleLoader__.load({
       'requests.count': 'TN total',
       'requests.inputHint': 'In = uncached input tokens; total = input + cache + output.',
       'note.unpriced': 'These models have no price, so their cost is counted as 0:',
+      'note.catalog': 'These models are estimated from the built-in catalogue (override them in pricing.json):',
       'footer.source': 'Local session logs only; these are locally recorded requests, not the provider’s full usage.',
       'footer.coverage': 'Local logs: SE sessions (LE live, ER unreadable).',
       'footer.cache': 'Cache read share = cache reads ÷ (input + cache reads), input side only.',
@@ -526,6 +528,11 @@ window.__ModuleLoader__.load({
 .ud-cell.is-out{opacity:.32}
 .ud-cell.is-selected{outline:2px solid var(--ud-text);outline-offset:1px}
 .ud-cell.is-today{box-shadow:inset 0 0 0 1px var(--ud-text2)}
+.ud-cell.lv0{background:color-mix(in srgb, var(--ud-text) 6%, var(--ud-sub))}
+.ud-cell.lv1{background:color-mix(in srgb, var(--ud-text) 20%, var(--ud-sub))}
+.ud-cell.lv2{background:color-mix(in srgb, var(--ud-text) 38%, var(--ud-sub))}
+.ud-cell.lv3{background:color-mix(in srgb, var(--ud-text) 60%, var(--ud-sub))}
+.ud-cell.lv4{background:color-mix(in srgb, var(--ud-text) 85%, var(--ud-sub))}
 .ud-tip{position:fixed;z-index:60;width:212px;padding:10px 12px;border-radius:10px;border:1px solid var(--ud-border);background:var(--ud-card);box-shadow:0 10px 30px rgba(3,7,18,.45);color:var(--ud-text);font-size:11.5px;pointer-events:none}
 .ud-tip-head{font-size:11.5px;color:var(--ud-text2);margin-bottom:6px}
 .ud-tip-row{display:flex;justify-content:space-between;gap:12px;line-height:1.7}
@@ -710,10 +717,12 @@ window.__ModuleLoader__.load({
     }
 
     // Heat scale: neutral greys matching the Harness dark surface family.
-    const HEAT_COLORS = ['#49494E', '#69696F', '#96969D', '#C7C7CE']
-    function cacheColor(level) {
-      if (level === 0) return '#303033'
-      return HEAT_COLORS[Math.min(HEAT_COLORS.length - 1, Math.max(0, level - 1))]
+    // Heat levels are theme-relative on purpose: every step mixes more of the
+    // theme's primary label colour into the sub-surface, so "more usage" always
+    // reads as stronger ink — darker on a light theme, brighter on a dark one.
+    // Fixed hex values here would invert the ramp as soon as Harness switches.
+    function heatTone(level) {
+      return 'lv' + Math.min(4, Math.max(0, level))
     }
 
     function MetricTabs(props) {
@@ -1523,6 +1532,7 @@ window.__ModuleLoader__.load({
           else if (!inRange) classes.push('is-out')
           if (selected === date) classes.push('is-selected')
           if (day === todayDay) classes.push('is-today')
+          if (!unknown) classes.push(heatTone(level))
 
           let head
           let rows
@@ -1554,7 +1564,7 @@ window.__ModuleLoader__.load({
               key,
               className: classes.join(' '),
               'data-day': unknown ? 'false' : 'true',
-              style: unknown ? undefined : { background: cacheColor(level) },
+              style: undefined,
               'aria-label': aria,
               role: 'button',
               tabIndex: unknown ? -1 : 0,
@@ -2441,7 +2451,7 @@ window.__ModuleLoader__.load({
             'div',
             { className: 'ud-legend', style: { marginTop: '10px' } },
             h('span', null, t('heat.less')),
-            [0, 1, 2, 3, 4].map((level) => h('span', { key: level, className: 'ud-cell', style: { background: cacheColor(level) } })),
+            [0, 1, 2, 3, 4].map((level) => h('span', { key: level, className: 'ud-cell ' + heatTone(level) })),
             h('span', null, t('heat.more')),
             h('span', { className: 'ud-cell is-unknown', style: { marginLeft: '6px' } }),
             h('span', null, t('heat.unknown')),
@@ -2458,6 +2468,11 @@ window.__ModuleLoader__.load({
             ? h('p', { className: 'ud-section-note', style: { marginTop: '10px' } }, t('note.unpriced') + ' ' + data.unpriced.map((row) => row.model).join(' · '))
             : null
 
+        const catalogNote =
+          data.catalog && data.catalog.length > 0
+            ? h('p', { className: 'ud-section-note', style: { marginTop: '10px' } }, t('note.catalog') + ' ' + data.catalog.map((row) => row.model).join(' · '))
+            : null
+
         body = h(
           'div',
           null,
@@ -2469,6 +2484,7 @@ window.__ModuleLoader__.load({
           heatSection,
           requestsSection,
           unpricedNote,
+          catalogNote,
         )
       }
 
