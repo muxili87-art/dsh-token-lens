@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Usage Analysis",
+    "description": "Analyze token spend, requests and failures, cache read share, cost, conversation time and model mix from local session logs, with hourly/daily trends, a calendar heatmap and a searchable request log."
+  }
+}

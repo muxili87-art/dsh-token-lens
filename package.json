@@ -1,0 +1,54 @@
+{
+  "name": "dsh-usage-dashboard",
+  "version": "1.0.0",
+  "description": "DeepSeek Harness 插件：把本地会话日志变成 Token / 请求 / 费用 / 缓存命中 / 模型速度的可视化用量看板。",
+  "license": "MIT",
+  "author": "muxili87-art",
+  "type": "module",
+  "main": "index.js",
+  "homepage": "https://github.com/muxili87-art/dsh-usage-dashboard#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muxili87-art/dsh-usage-dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/muxili87-art/dsh-usage-dashboard/issues"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "plugin",
+    "usage",
+    "dashboard",
+    "token",
+    "cost"
+  ],
+  "files": [
+    "index.js",
+    "fold.js",
+    "client.js",
+    "cordis.patch.yml",
+    "pricing.json",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "check": "node --check index.js && node --check fold.js && node --check client.js",
+    "pack": "sh scripts/build-release.sh"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-locale"
+      ]
+    }
+  }
+}
