@@ -69,6 +69,26 @@ plugin_manager install_bundle target=<解压后的绝对路径>
 
 安装后数据自动计算：插件会在后台扫描 `~/.dsh/sessions`，增量折叠成按天桶并缓存到 `~/.dsh/usage-dashboard/cache.v1.json`，之后每次打开只做增量更新。
 
+### 装完应用起不来怎么办
+
+**v1.0.0 的 zip 是坏的，请勿使用**：它的 `package.json` 漏了 `exports["./client"]`，Harness 启动扫描会直接抛错、整个插件组装链失败，应用打不开。请升级到 **v1.0.1 或更新**。
+
+如果装完任何版本都起不来，按这个顺序排查：
+
+1. 打开插件目录，执行自检：
+
+```bash
+npm run doctor
+```
+
+   `✗ 声明了 dsh.client，但 package.json 没有 exports 映射` 就是上面那个问题（改用 v1.0.1+）；
+2. 先卸载再重装：把 `~/.dsh/profiles/<profile>/node_modules/dsh-usage-dashboard` 删掉、`cordis.patch.yml` 里对应的行删掉，重启确认应用恢复，再重新 `install_bundle`；
+3. 仍失败时把 Harness 启动日志里 `client-modules:` 开头的报错发到 [Issues](https://github.com/muxili87-art/dsh-usage-dashboard/issues)。
+
+### Windows 说明
+
+插件本身与操作系统无关（路径全部走 `homedir()` / `path.join`，没有平台专用代码）。Windows 上如果**从命令行启动** Harness 后它静默退出，通常不是插件问题，而是环境变量同时存在 `HTTPS_PROXY` 和 `https_proxy`（大小写重复）：清掉其中一个，或直接双击桌面图标启动即可。
+
 ## 隐私模式
 
 点右上角「隐私模式」后：
@@ -160,9 +180,16 @@ plugin_manager install_bundle target=<解压后的绝对路径>
 零运行时依赖（只用 Node 内建与 Harness 自带包），改完直接跑：
 
 ```bash
-npm run check   # 三个 JS 文件的语法检查
-npm run pack    # 生成 dist/dsh-usage-dashboard-<version>.zip
+npm run check    # 三个 JS 文件的语法检查
+npm run doctor   # 校验 bundle 契约（dsh.client / exports / patch 行名 / 模块 id）
+npm run verify   # 上面两步一起
+npm run pack     # 生成 dist/dsh-usage-dashboard-<version>.zip
 ```
+
+> `npm run doctor` 复刻宿主 `client-modules` 的启动校验。**发布前必须通过**：
+> 只要 `dsh.client` 缺了 `exports["./client"]`，Harness 启动扫描就会抛
+> `declares dsh.client but exports no "./client" bundle`，整个插件组装链失败、应用起不来
+> —— v1.0.0 就是这么翻车的。CI 每次 push 也会跑这两个检查。
 
 结构：
 

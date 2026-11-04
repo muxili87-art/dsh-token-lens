@@ -1,11 +1,19 @@
 {
   "name": "dsh-usage-dashboard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "DeepSeek Harness 插件：把本地会话日志变成 Token / 请求 / 费用 / 缓存命中 / 模型速度的可视化用量看板。",
   "license": "MIT",
   "author": "muxili87-art",
   "type": "module",
   "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./client.js": "./client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
   "homepage": "https://github.com/muxili87-art/dsh-usage-dashboard#readme",
   "repository": {
     "type": "git",
@@ -36,7 +44,9 @@
   ],
   "scripts": {
     "check": "node --check index.js && node --check fold.js && node --check client.js",
-    "pack": "sh scripts/build-release.sh"
+    "doctor": "node scripts/doctor.mjs",
+    "pack": "sh scripts/build-release.sh",
+    "verify": "npm run check && npm run doctor"
   },
   "dsh": {
     "bundle": {
