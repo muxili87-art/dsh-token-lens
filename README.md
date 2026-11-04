@@ -4,6 +4,8 @@
 
 Token、请求、缓存命中、费用、模型速度、对话耗时——全部从本机日志算出来，不联网、不上传、不需要 API Key。
 
+中文 | [English](README.en.md)
+
 [![license](https://img.shields.io/badge/license-MIT-3da639.svg)](LICENSE)
 [![deps](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](#开发与打包)
 [![deepseek harness](https://img.shields.io/badge/DeepSeek%20Harness-0.2.1--rc.5-4b6bfb.svg)](https://github.com/muxili87-art/dsh-usage-dashboard)
