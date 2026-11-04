@@ -37,6 +37,12 @@ window.__ModuleLoader__.load({
       'range.all': '全部',
       'range.custom': '自定义',
       refresh: '刷新',
+      'update.check': '检查更新',
+      'update.checking': '检查中…',
+      'update.available': '发现新版本 LATEST（当前 CURRENT）',
+      'update.open': '打开发布页',
+      'update.latest': '已是最新版本（VERSION）',
+      'update.error': '无法连接 GitHub，检查网络后重试',
       updated: '更新于',
       loading: '正在读取会话日志…',
       scanning: '正在统计历史会话',
@@ -200,11 +206,11 @@ window.__ModuleLoader__.load({
       'requests.inputHint': '输入 = 未命中缓存的输入 Token；总 Token = 输入 + 缓存 + 输出。',
       'note.unpriced': '以下模型没有价格，费用按 0 计：',
       'note.catalog': '以下模型按内置通用价目表估算（仅供估算，可在 pricing.json 覆盖）：',
-      'footer.source': '数据来自本地会话日志；这是本地记录的请求，不等价于供应商平台的完整用量。',
-      'footer.coverage': '本地日志：SE 个会话（进行中 LE 个，读取失败 ER 个）。',
-      'footer.cache': '缓存读取占比 = 缓存读取 ÷（输入 + 缓存读取），只反映输入侧。',
-      'footer.time': '对话时长是回合起止累计，不等于会话经过时间；与模型 + 工具之差为排队与回合开销。',
-      'footer.price': '费用按 pricing.json 中的价格估算，仅供参考，最终以供应商账单为准。',
+      'footer.source': '数据来自本地会话日志，非供应商平台完整用量',
+      'footer.coverage': 'SE 个会话（进行中 LE · 失败 ER）',
+      'footer.cache': '缓存占比＝缓存读取÷(输入+缓存读取)，仅输入侧',
+      'footer.time': '对话时长＝回合起止累计，不含排队与回合开销',
+      'footer.price': '费用按 pricing.json 估算，以供应商账单为准',
     }
 
     const en = {
@@ -217,6 +223,12 @@ window.__ModuleLoader__.load({
       'range.all': 'All time',
       'range.custom': 'Custom',
       refresh: 'Refresh',
+      'update.check': 'Check updates',
+      'update.checking': 'Checking…',
+      'update.available': 'Version LATEST is available (current CURRENT)',
+      'update.open': 'Open release',
+      'update.latest': 'Up to date (VERSION)',
+      'update.error': 'Cannot reach GitHub — check your network and retry',
       updated: 'Updated',
       loading: 'Reading session logs…',
       scanning: 'Scanning history',
@@ -380,11 +392,11 @@ window.__ModuleLoader__.load({
       'requests.inputHint': 'In = uncached input tokens; total = input + cache + output.',
       'note.unpriced': 'These models have no price, so their cost is counted as 0:',
       'note.catalog': 'These models are estimated from the built-in catalogue (override them in pricing.json):',
-      'footer.source': 'Local session logs only; these are locally recorded requests, not the provider’s full usage.',
-      'footer.coverage': 'Local logs: SE sessions (LE live, ER unreadable).',
-      'footer.cache': 'Cache read share = cache reads ÷ (input + cache reads), input side only.',
-      'footer.time': 'Conversation time sums turn durations, not session wall time; the gap to model + tools is queueing and turn overhead.',
-      'footer.price': 'Cost is estimated from pricing.json and is not a bill; the provider statement is authoritative.',
+      'footer.source': 'Local session logs only — not the provider’s full usage',
+      'footer.coverage': 'SE sessions (LE live · ER unreadable)',
+      'footer.cache': 'Cache share = cacheRead ÷ (input + cacheRead), input side only',
+      'footer.time': 'Conversation time = turn start-to-end, excluding queueing and turn overhead',
+      'footer.price': 'Cost estimated from pricing.json; the provider bill wins',
     }
 
     const CSS = `
@@ -1969,6 +1981,7 @@ window.__ModuleLoader__.load({
       const [dayFilter, setDayFilter] = useState(null)
       const [restore, setRestore] = useState(null)
       const [privacy, setPrivacy] = useState(false)
+      const [update, setUpdate] = useState(null)
       const sessionMap = useRef(null)
       const accountMap = useRef(null)
       const sessionSeq = useRef(0)
@@ -2005,6 +2018,20 @@ window.__ModuleLoader__.load({
       const to = bounds[1]
 
       const refresh = useCallback(() => setRevision((value) => value + 1), [])
+
+      // Release check: the host proxies api.github.com (browsers cannot reach it
+      // without CORS), so the panel only needs one authenticated local route.
+      const checkUpdate = useCallback(async () => {
+        setUpdate({ state: 'checking' })
+        try {
+          const response = await fetch('usage-dashboard/update?force=1', { credentials: 'same-origin' })
+          if (!response.ok) throw new Error('HTTP ' + response.status)
+          const payload = await response.json()
+          setUpdate(payload.error ? { state: 'error', error: payload.error } : { state: 'done', ...payload })
+        } catch (error) {
+          setUpdate({ state: 'error', error: String(error && error.message ? error.message : error) })
+        }
+      }, [])
 
       useEffect(() => {
         let cancelled = false
@@ -2153,6 +2180,18 @@ window.__ModuleLoader__.load({
           ),
           h(
             'button',
+            {
+              type: 'button',
+              className: 'ud-refresh',
+              'data-active': String(update !== null && update.state === 'done' && update.updateAvailable === true),
+              onClick: checkUpdate,
+              disabled: update !== null && update.state === 'checking',
+              title: t('update.check'),
+            },
+            update !== null && update.state === 'checking' ? t('update.checking') : t('update.check'),
+          ),
+          h(
+            'button',
             { type: 'button', className: 'ud-refresh', 'data-busy': String(busy), onClick: refresh, disabled: state.loading },
             h(
               'svg',
@@ -2242,6 +2281,38 @@ window.__ModuleLoader__.load({
               h('button', { type: 'button', className: 'ud-filter-clear', onClick: clearAll }, t('filter.all')),
             )
           : null
+
+        // Provider *names* never reach the footer: counts by billing source keep
+        // the line short and stop personal relay names leaking into screenshots.
+        const billingSummary = () => {
+          const counts = new Map()
+          const providers = (data && data.pricing && data.pricing.providers) || []
+          for (const item of providers) {
+            const label = item.source === 'official' ? t('billing.official') : item.source === 'assumed-official' ? t('billing.assumed') : t('billing.unconfirmed')
+            counts.set(label, (counts.get(label) || 0) + 1)
+          }
+          const parts = [...counts].map(([label, count]) => (count > 1 ? label + ' ×' + count : label))
+          const checked = data && data.pricing && data.pricing.checkedAt ? ' · ' + t('billing.checkedAt') + ' ' + data.pricing.checkedAt : ''
+          const tools = data && data.pricing && data.pricing.tools ? ' · ' + t('billing.tools') : ''
+          return t('billing.footer') + parts.join(' · ') + checked + tools
+        }
+
+        const releaseBanner =
+          update === null
+            ? null
+            : update.state === 'error'
+              ? h('div', { className: 'ud-banner' }, t('update.error'))
+              : update.state === 'done'
+                ? update.updateAvailable
+                  ? h(
+                      'div',
+                      { className: 'ud-banner' },
+                      h('span', null, t('update.available').replace('LATEST', String(update.latest)).replace('CURRENT', String(update.current))),
+                      update.url ? h('a', { href: String(update.url), target: '_blank', rel: 'noreferrer' }, t('update.open')) : null,
+                      h('code', null, 'plugin_manager install_bundle target=<解压后的目录>'),
+                    )
+                  : h('div', { className: 'ud-banner' }, t('update.latest').replace('VERSION', String(update.current)))
+                : null
 
       let body = null
       if (data === null) {
@@ -2501,46 +2572,30 @@ window.__ModuleLoader__.load({
             header,
             dates,
             banner,
+            releaseBanner,
             body,
             h(
               'footer',
               { className: 'ud-footer' },
-              h('div', null, t('footer.source')),
-              data && data.coverage
-                ? h(
-                    'div',
-                    null,
-                    t('footer.coverage')
-                      .replace('SE', fmtInt(data.coverage.sessions))
-                      .replace('LE', fmtInt(data.coverage.live))
-                      .replace('ER', fmtInt(data.coverage.errors)),
-                  )
-                : null,
-              h('div', null, t('footer.cache')),
-              h('div', null, t('footer.time')),
-              h('div', null, t('footer.price'), ' ', h('code', null, 'pricing.json')),
-              data && data.pricing
-                ? h(
-                    'div',
-                    null,
-                    t('billing.footer') +
-                      data.pricing.providers
-                        .map(
-                          (item) =>
-                            item.label +
-                            '（' +
-                            (item.source === 'official'
-                              ? t('billing.official')
-                              : item.source === 'assumed-official'
-                                ? t('billing.assumed')
-                                : t('billing.unconfirmed')) +
-                            '）',
-                        )
-                        .join(' · ') +
-                      (data.pricing.checkedAt ? ' · ' + t('billing.checkedAt') + ' ' + data.pricing.checkedAt : '') +
-                      (data.pricing.tools ? ' · ' + t('billing.tools') : ''),
-                  )
-                : null,
+              h(
+                'div',
+                null,
+                t('footer.source') +
+                  (data && data.coverage
+                    ? ' · ' +
+                      t('footer.coverage')
+                        .replace('SE', fmtInt(data.coverage.sessions))
+                        .replace('LE', fmtInt(data.coverage.live))
+                        .replace('ER', fmtInt(data.coverage.errors))
+                    : ''),
+              ),
+              h(
+                'div',
+                null,
+                t('footer.cache') + ' · ' + t('footer.time') + ' · ' + t('footer.price') + ' ',
+                h('code', null, 'pricing.json'),
+              ),
+              data && data.pricing ? h('div', null, billingSummary()) : null,
             ),
           ),
         ),

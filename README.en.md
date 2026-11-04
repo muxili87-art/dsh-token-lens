@@ -39,6 +39,7 @@ This plugin answers all of it at once: one click in the sidebar for trends, a he
 | **Speed panel** | Speed distribution (P25/P50/P75 ranges) and a speed trend chart for fast multi-model comparison |
 | **Searchable request log** | Sort by time/duration/tokens, filter by model and keyword, separate view for failed requests |
 | **Privacy mode** | One click hides session titles, accounts, error details and sensitive model names; every number stays identical — safe for screenshots and issues |
+| **Update check** | The header's *Check updates* asks GitHub for the latest release and shows the release page and install command when a newer one exists |
 | **Peak/off-peak pricing + built-in catalogue** | Peak/off-peak rates on Beijing-time weekdays; ships public list prices for DeepSeek / OpenAI / Anthropic / Gemini and matches them by model name |
 
 The panel follows the Harness language setting (Chinese / English).
@@ -70,6 +71,8 @@ plugin_manager install_bundle target=<absolute path to the unzipped folder>
 
 3. Quit DeepSeek Harness completely and reopen it (the first load or a replacement must restart so the browser-side client modules are rebuilt);
 4. The **Usage Analysis** icon appears in the sidebar.
+
+Upgrades: run `plugin_manager install_bundle` again with the new zip, then quit and reopen. The panel's *Check updates* button tells you when GitHub has a newer release.
 
 Data is computed automatically: the plugin scans `~/.dsh/sessions` in the background, folds it into per-day buckets and caches the result in `~/.dsh/usage-dashboard/cache.v1.json`, then only refreshes incrementally.
 

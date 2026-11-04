@@ -17,6 +17,9 @@ export const inject = ['webServer', 'connection', 'sessionQuery', 'sessions']
 
 const ROUTE_PATH = '/usage-dashboard/summary'
 const REQUESTS_PATH = '/usage-dashboard/requests'
+const UPDATE_PATH = '/usage-dashboard/update'
+const UPDATE_REPO = 'muxili87-art/dsh-token-lens'
+const UPDATE_TTL_MS = 10 * 60_000
 const CACHE_VERSION = 3
 const PLUGIN_DIR = dirname(fileURLToPath(import.meta.url))
 const DSH_HOME = process.env.DSH_HOME || join(homedir(), '.dsh')
@@ -33,6 +36,30 @@ function sendJson(res, status, payload) {
   res.setHeader('content-type', 'application/json; charset=utf-8')
   res.setHeader('cache-control', 'no-store')
   res.end(JSON.stringify(payload))
+}
+
+
+/** Numeric semver comparison; pre-release suffixes are ignored on purpose. */
+function compareVersion(left, right) {
+  const parse = (value) => String(value || '').replace(/^v/i, '').split(/[.+-]/).map((part) => Number.parseInt(part, 10) || 0)
+  const a = parse(left)
+  const b = parse(right)
+  for (let i = 0; i < Math.max(a.length, b.length, 3); i += 1) {
+    const x = a[i] || 0
+    const y = b[i] || 0
+    if (x > y) return 1
+    if (x < y) return -1
+  }
+  return 0
+}
+
+async function readLocalVersion() {
+  try {
+    const manifest = JSON.parse(await readFile(join(PLUGIN_DIR, 'package.json'), 'utf8'))
+    return typeof manifest.version === 'string' ? manifest.version : '0.0.0'
+  } catch {
+    return '0.0.0'
+  }
 }
 
 function errorText(error) {
@@ -329,6 +356,58 @@ export function apply(ctx) {
     }
   }
 
+
+  let updateCache = null
+
+  /**
+   * Proxy the GitHub "latest release" lookup. The renderer has no outbound
+   * network of its own (CSP + CORS), so the host answers instead and caches for
+   * ten minutes; `force=1` skips the cache for the explicit button.
+   */
+  async function checkUpdate(force) {
+    if (!force && updateCache !== null && Date.now() - updateCache.at < UPDATE_TTL_MS) return updateCache.payload
+    const current = await readLocalVersion()
+    const payload = {
+      current,
+      latest: null,
+      url: null,
+      publishedAt: null,
+      asset: null,
+      updateAvailable: false,
+      checkedAt: new Date().toISOString(),
+      repo: UPDATE_REPO,
+      error: null,
+    }
+    try {
+      const response = await fetch('https://api.github.com/repos/' + UPDATE_REPO + '/releases/latest', {
+        headers: { accept: 'application/vnd.github+json', 'user-agent': 'dsh-token-lens-update-check' },
+        signal: AbortSignal.timeout(7000),
+      })
+      if (!response.ok) throw new Error('HTTP ' + response.status)
+      const release = await response.json()
+      payload.latest = typeof release.tag_name === 'string' ? release.tag_name : null
+      payload.url = typeof release.html_url === 'string' ? release.html_url : null
+      payload.publishedAt = typeof release.published_at === 'string' ? release.published_at : null
+      const asset = Array.isArray(release.assets) ? release.assets.find((item) => typeof item.name === 'string' && item.name.endsWith('.zip')) : null
+      payload.asset = asset && typeof asset.browser_download_url === 'string' ? asset.browser_download_url : null
+      payload.updateAvailable = payload.latest !== null && compareVersion(payload.latest, current) > 0
+    } catch (error) {
+      payload.error = errorText(error)
+    }
+    updateCache = { at: Date.now(), payload }
+    return payload
+  }
+
+  async function updateHandler(req, res) {
+    if (reject(req, res)) return
+    const { url } = readQuery(req)
+    try {
+      sendJson(res, 200, await checkUpdate(url.searchParams.get('force') === '1'))
+    } catch (error) {
+      sendJson(res, 500, { status: 'error', error: errorText(error) })
+    }
+  }
+
   ctx.effect(
     () => ctx.webServer.register({ kind: 'exact', path: ROUTE_PATH, handler }),
     'usage-dashboard: GET ' + ROUTE_PATH,
@@ -336,6 +415,10 @@ export function apply(ctx) {
   ctx.effect(
     () => ctx.webServer.register({ kind: 'exact', path: REQUESTS_PATH, handler: requestsHandler }),
     'usage-dashboard: GET ' + REQUESTS_PATH,
+  )
+  ctx.effect(
+    () => ctx.webServer.register({ kind: 'exact', path: UPDATE_PATH, handler: updateHandler }),
+    'usage-dashboard: GET ' + UPDATE_PATH,
   )
   ctx.effect(() => () => controller.abort(), 'usage-dashboard: stop session scans')
 }
