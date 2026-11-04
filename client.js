@@ -38,6 +38,7 @@ window.__ModuleLoader__.load({
       'range.custom': '自定义',
       refresh: '刷新',
       'update.check': '检查更新',
+      'update.current': '当前',
       'update.checking': '检查中…',
       'update.available': '发现新版本 LATEST（当前 CURRENT）',
       'update.open': '打开发布页',
@@ -224,6 +225,7 @@ window.__ModuleLoader__.load({
       'range.custom': 'Custom',
       refresh: 'Refresh',
       'update.check': 'Check updates',
+      'update.current': 'current',
       'update.checking': 'Checking…',
       'update.available': 'Version LATEST is available (current CURRENT)',
       'update.open': 'Open release',
@@ -2186,7 +2188,7 @@ window.__ModuleLoader__.load({
               'data-active': String(update !== null && update.state === 'done' && update.updateAvailable === true),
               onClick: checkUpdate,
               disabled: update !== null && update.state === 'checking',
-              title: t('update.check'),
+              title: update !== null && update.current ? t('update.check') + ' · ' + t('update.current') + ' ' + String(update.current) : t('update.check'),
             },
             update !== null && update.state === 'checking' ? t('update.checking') : t('update.check'),
           ),
@@ -2291,7 +2293,9 @@ window.__ModuleLoader__.load({
             const label = item.source === 'official' ? t('billing.official') : item.source === 'assumed-official' ? t('billing.assumed') : t('billing.unconfirmed')
             counts.set(label, (counts.get(label) || 0) + 1)
           }
-          const parts = [...counts].map(([label, count]) => (count > 1 ? label + ' ×' + count : label))
+          // Distinct sources only: "×2" read as a price multiplier, not a provider count.
+          const rank = (label) => (label === t('billing.official') ? 0 : label === t('billing.assumed') ? 1 : 2)
+          const parts = [...counts.keys()].sort((a, b) => rank(a) - rank(b))
           const checked = data && data.pricing && data.pricing.checkedAt ? ' · ' + t('billing.checkedAt') + ' ' + data.pricing.checkedAt : ''
           const tools = data && data.pricing && data.pricing.tools ? ' · ' + t('billing.tools') : ''
           return t('billing.footer') + parts.join(' · ') + checked + tools
