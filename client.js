@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-  id: 'dsh-usage-dashboard',
+  id: 'dsh-token-lens',
   factory(require) {
     const React = require('react')
     const h = React.createElement

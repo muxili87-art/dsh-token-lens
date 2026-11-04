@@ -1,4 +1,4 @@
-# Usage Dashboard
+# TokenLens · Usage Lens
 
 **Turn DeepSeek Harness session logs into a usage and cost dashboard you can actually read.**
 
@@ -8,7 +8,7 @@ Tokens, requests, cache hits, cost, model speed, conversation time — all compu
 
 [![license](https://img.shields.io/badge/license-MIT-3da639.svg)](LICENSE)
 [![deps](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](#development-and-packaging)
-[![deepseek harness](https://img.shields.io/badge/DeepSeek%20Harness-0.2.1--rc.5-4b6bfb.svg)](https://github.com/muxili87-art/dsh-usage-dashboard)
+[![deepseek harness](https://img.shields.io/badge/DeepSeek%20Harness-0.2.1--rc.5-4b6bfb.svg)](https://github.com/muxili87-art/dsh-token-lens)
 [![local only](https://img.shields.io/badge/data-stays%20local-8a63d2.svg)](#privacy-mode)
 
 ![Usage dashboard overview](docs/screenshots/overview.png)
@@ -61,7 +61,7 @@ The panel follows the Harness language setting (Chinese / English).
 
 Requires the DeepSeek Harness desktop app (developed and verified on `0.2.1-rc.5`).
 
-1. Download `dsh-usage-dashboard-<version>.zip` from [Releases](https://github.com/muxili87-art/dsh-usage-dashboard/releases) and unzip it anywhere; note the **absolute path**;
+1. Download `dsh-token-lens-<version>.zip` from [Releases](https://github.com/muxili87-art/dsh-token-lens/releases) and unzip it anywhere; note the **absolute path**;
 2. In a Harness session run:
 
 ```text
@@ -86,8 +86,8 @@ npm run doctor
 ```
 
    `✗ declares dsh.client but package.json has no exports mapping` is exactly the bug above (use v1.0.1+);
-2. Uninstall, then reinstall: delete `~/.dsh/profiles/<profile>/node_modules/dsh-usage-dashboard` and its row in `cordis.patch.yml`, restart to confirm the app recovers, then run `install_bundle` again;
-3. If it still fails, send the startup log lines beginning with `client-modules:` to [Issues](https://github.com/muxili87-art/dsh-usage-dashboard/issues).
+2. Uninstall, then reinstall: delete `~/.dsh/profiles/<profile>/node_modules/dsh-token-lens` and its row in `cordis.patch.yml`, restart to confirm the app recovers, then run `install_bundle` again;
+3. If it still fails, send the startup log lines beginning with `client-modules:` to [Issues](https://github.com/muxili87-art/dsh-token-lens/issues).
 
 ### Windows notes
 
@@ -187,7 +187,7 @@ Zero runtime dependencies (Node built-ins and Harness-shipped packages only):
 npm run check    # syntax check for the three JS files
 npm run doctor   # validate the bundle contract (dsh.client / exports / patch row name / module id)
 npm run verify   # both of the above
-npm run pack     # build dist/dsh-usage-dashboard-<version>.zip
+npm run pack     # build dist/dsh-token-lens-<version>.zip
 ```
 
 > `npm run doctor` mirrors the host's `client-modules` startup validation. **It must pass before release**:

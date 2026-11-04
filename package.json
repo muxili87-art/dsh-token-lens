@@ -1,7 +1,7 @@
 {
-  "name": "dsh-usage-dashboard",
-  "version": "1.0.2",
-  "description": "DeepSeek Harness 插件：把本地会话日志变成 Token / 请求 / 费用 / 缓存命中 / 模型速度的可视化用量看板。",
+  "name": "dsh-token-lens",
+  "version": "1.0.3",
+  "description": "TokenLens · 用量透镜：DeepSeek Harness 插件，把本地会话日志变成 Token / 请求 / 费用 / 缓存命中 / 模型速度的可视化用量看板。",
   "license": "MIT",
   "author": "muxili87-art",
   "type": "module",
@@ -14,18 +14,19 @@
     "./locale/*.json": "./locale/*.json",
     "./icon": "./icon.svg"
   },
-  "homepage": "https://github.com/muxili87-art/dsh-usage-dashboard#readme",
+  "homepage": "https://github.com/muxili87-art/dsh-token-lens#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/muxili87-art/dsh-usage-dashboard.git"
+    "url": "git+https://github.com/muxili87-art/dsh-token-lens.git"
   },
   "bugs": {
-    "url": "https://github.com/muxili87-art/dsh-usage-dashboard/issues"
+    "url": "https://github.com/muxili87-art/dsh-token-lens/issues"
   },
   "keywords": [
     "deepseek-harness",
     "dsh",
-    "plugin",
+    "dsh-plugin",
+    "tokenlens",
     "usage",
     "dashboard",
     "token",

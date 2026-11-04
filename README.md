@@ -1,4 +1,4 @@
-# 用量分析 · Usage Dashboard
+# TokenLens · 用量透镜
 
 **把 DeepSeek Harness 的本地会话日志，变成一张能看懂的用量与费用看板。**
 
@@ -8,7 +8,7 @@ Token、请求、缓存命中、费用、模型速度、对话耗时——全部
 
 [![license](https://img.shields.io/badge/license-MIT-3da639.svg)](LICENSE)
 [![deps](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](#开发与打包)
-[![deepseek harness](https://img.shields.io/badge/DeepSeek%20Harness-0.2.1--rc.5-4b6bfb.svg)](https://github.com/muxili87-art/dsh-usage-dashboard)
+[![deepseek harness](https://img.shields.io/badge/DeepSeek%20Harness-0.2.1--rc.5-4b6bfb.svg)](https://github.com/muxili87-art/dsh-token-lens)
 [![local only](https://img.shields.io/badge/data-stays%20local-8a63d2.svg)](#隐私模式)
 
 ![用量分析总览](docs/screenshots/overview.png)
@@ -59,7 +59,7 @@ Harness 默认只记录会话日志，不会告诉你：
 
 前置：DeepSeek Harness 桌面版（开发与验证版本 `0.2.1-rc.5`）。
 
-1. 下载 [Release](https://github.com/muxili87-art/dsh-usage-dashboard/releases) 里的 `dsh-usage-dashboard-<version>.zip`，解压到任意目录并记下**绝对路径**；
+1. 下载 [Release](https://github.com/muxili87-art/dsh-token-lens/releases) 里的 `dsh-token-lens-<version>.zip`，解压到任意目录并记下**绝对路径**；
 2. 在 Harness 会话里执行：
 
 ```text
@@ -84,8 +84,8 @@ npm run doctor
 ```
 
    `✗ 声明了 dsh.client，但 package.json 没有 exports 映射` 就是上面那个问题（改用 v1.0.1+）；
-2. 先卸载再重装：把 `~/.dsh/profiles/<profile>/node_modules/dsh-usage-dashboard` 删掉、`cordis.patch.yml` 里对应的行删掉，重启确认应用恢复，再重新 `install_bundle`；
-3. 仍失败时把 Harness 启动日志里 `client-modules:` 开头的报错发到 [Issues](https://github.com/muxili87-art/dsh-usage-dashboard/issues)。
+2. 先卸载再重装：把 `~/.dsh/profiles/<profile>/node_modules/dsh-token-lens` 删掉、`cordis.patch.yml` 里对应的行删掉，重启确认应用恢复，再重新 `install_bundle`；
+3. 仍失败时把 Harness 启动日志里 `client-modules:` 开头的报错发到 [Issues](https://github.com/muxili87-art/dsh-token-lens/issues)。
 
 ### Windows 说明
 
@@ -185,7 +185,7 @@ npm run doctor
 npm run check    # 三个 JS 文件的语法检查
 npm run doctor   # 校验 bundle 契约（dsh.client / exports / patch 行名 / 模块 id）
 npm run verify   # 上面两步一起
-npm run pack     # 生成 dist/dsh-usage-dashboard-<version>.zip
+npm run pack     # 生成 dist/dsh-token-lens-<version>.zip
 ```
 
 > `npm run doctor` 复刻宿主 `client-modules` 的启动校验。**发布前必须通过**：
